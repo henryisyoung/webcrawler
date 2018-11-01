@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 import requests
-from lxml import html
 from bs4 import BeautifulSoup
 
-Base_URL = "https://www.staging.yammer.com" #"https://github.com/login"
-Login_URL = 'https://www.staging.yammer.com/session' #"https://github.com/session"
+Base_URL = "https://github.com/login"
+Login_URL = "https://github.com/session"
 
 def get_github_html(url):
     '''
@@ -25,24 +24,10 @@ def get_token(html):
     :param html:
     :return: 获取csrftoken
     '''
-    # soup = BeautifulSoup(html,'lxml')
-    # res = soup.find("input",attrs={"name":"authenticity_token"})
-    # token = res["value"]
-    # return token
-    session_requests = requests.session()
-    agent = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Mobile Safari/537.36'
-    headers = {
-        "Host": "www.staging.yammer.com",
-        "Referer": "https://www.staging.yammer.com",
-        'User-Agent': agent
-    }
-
-    index_url = 'https://www.staging.yammer.com/login?'
-    index_page = session_requests.get(index_url, headers=headers)
-    tree = html.fromstring(index_page.text)
-
-    authenticity_token = list(set(tree.xpath("//input[@name='authenticity_token']/@value")))[0]
-    return authenticity_token
+    soup = BeautifulSoup(html,'lxml')
+    res = soup.find("input",attrs={"name":"authenticity_token"})
+    token = res["value"]
+    return token
 
 
 def gihub_login(url,token,cookie):
@@ -55,13 +40,11 @@ def gihub_login(url,token,cookie):
     '''
 
     data= {
-        # "commit": "Sign in",
+        "commit": "Sign in",
         "utf8":"✓",
-        "network_permalink": '',
         "authenticity_token":token,
         "login":"zyun3939@gmail.com",
-        "password":"evring89668",
-        "remember_me=":"on"
+        "password":"evring89668"
     }
     response = requests.post(url,data=data,cookies=cookie)
     print(response.status_code)
@@ -76,5 +59,5 @@ if __name__ == '__main__':
     html,cookie = get_github_html(Base_URL)
     token = get_token(html)
     cookie = gihub_login(Login_URL,token,cookie)
-    response = requests.get("https://www.staging.yammer.com/salmonellaville.com/#/home?type=following",cookies=cookie)
+    response = requests.get("https://github.com/settings/repositories",cookies=cookie)
     print(response.text)
